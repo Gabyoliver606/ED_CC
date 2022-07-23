@@ -2,37 +2,48 @@
 #include <vector>
 #include <list>
 #include <algorithm>
-
-using namespace std;
+#include <cmath>
+#include <sstream>
+#include <map>
 
 struct Pos {
-    int x;
-    int y;
+    int l;
+    int c;
 };
 
-vector <Pos> get_vizinhos(Pos pos) {
-    return {Pos{pos.x, pos.y - 1}, Pos{pos.x, pos.y + 1}, Pos{pos.x - 1, pos.y}, Pos{pos.x + 1, pos.y}};
+#define get(mat, pos) mat[pos.l][pos.c]
+
+std::vector<Pos> get_vizinhos(Pos p) {
+    std::vector<Pos> vizinhos = {
+        {p.l - 1, p.c},
+        {p.l + 1, p.c},
+        {p.l, p.c - 1},
+        {p.l, p.c + 1}
+    };
+    return vizinhos;
 }
 
-void go_back(vector<string> &mat, vector<vector<int>> &dist, Pos pos, int value){
-    if(get(mat, pos) != 'x' || get(dist, pos) != value) 
-        return;
-    get(mat, pos) = '.';
-    for(Pos viz : get_vizinhos(pos))
-        go_back(mat, dist, viz, value - 1); 
+void refazer (std::vector<std::string> &mat, Pos p) {
+    std::vector<Pos> vizinhos = get_vizinhos(p);
+    for (auto vizinho : vizinhos) {
+        if (get(mat, vizinho) == '#') {
+            mat[vizinho.l][vizinho.c] = 'o';
+            refazer(mat, vizinho);
+        }
+    }
 }
 
-bool procurar_saida (vector <string> &matrix, Pos inicio, Pos fim) {
-    vector <Pos> pilha;
+bool procurar_saida (std::vector<std::string> &mat, Pos inicio, Pos fim) {
+    std::vector<Pos> pilha;
     pilha.push_back(inicio);
     while (!pilha.empty()) {
         auto top = pilha.back();
         pilha.pop_back();
-        if(top.x == fim.x && top.y == fim.y)
+        if(top.l == fim.l && top.c == fim.c)
             return true;
         for (auto vizinho : get_vizinhos(top)) {
-            if (get(matrix, vizinho) == '#') {
-                set(matrix, vizinho, 'o');
+            if (get(mat, vizinho) == '#') {
+                mat[vizinho.l][vizinho.c] = 'o';
                 pilha.push_back(vizinho);
             }
         }
@@ -40,26 +51,25 @@ bool procurar_saida (vector <string> &matrix, Pos inicio, Pos fim) {
     return false;
 }
 
-void remover_erros (vector <string> &matrix) {
-    for (size_t i = 0; i < matrix.size(); i++) {
-        for (size_t j = 0; j < matrix[0].size(); j++) {
-            if (matrix[i][j] == 'o') {
-                matrix[i][j] = '#';
+void remover_erros (std::vector<std::string> &mat) {
+    Pos saida;
+    for (size_t i = 0; i < mat.size(); i++) {
+        for (size_t j = 0; j < mat[0].size(); j++) {
+            if (mat[i][j] == 'o') {
+                mat[i][j] = '#';
             }
         }
     }
 }
 
-int main () {
+int main() {
     int nl = 0, nc = 0;
-    cin >> nl >> nc;
-    vector<string> mat(nl, ""); 
-    getchar();
+    std::cin >> nl >> nc;
+    std::vector<std::string> mat(nl, ""); 
+    std::getchar();
     Pos inicio, fim;
-    
     for(int i = 0; i < nl; i++)
-        getline(cin, mat[i]);
-    
+        std::getline(std::cin, mat[i]);
     for(int l = 0; l < nl; l++){
         for(int c = 0; c < nc; c++){
             if(mat[l][c] == 'I'){
@@ -68,39 +78,18 @@ int main () {
             }
         }
     }
-    
-    vector<vector<int>> dist(nl, vector<int>(nc, 0));
-    vector<vector<bool>> visited(nl, vector<bool>(nc, false));
-    list<Pos> q;
-    q.push_back(inicio);
-    visited[inicio.x][inicio.y] = true;
-    int value = 0;
-    while(!q.empty()){
-        Pos top = q.front();
-        q.pop_front();
-        if(top.x == fim.x && top.y == fim.y)
-            break;
-        for(Pos viz : get_vizinhos(top)){
-            if(!visited[viz.x][viz.y] && get(matrix, viz) == '#'){
-                visited[viz.x][viz.y] = true;
-                q.push_back(viz);
-                set(dist, viz, value);
+    if (procurar_saida(mat, inicio, fim)) {
+        refazer(mat, inicio);
+        remover_erros(mat);
+        std::cout << "S";
+        for (size_t i = 0; i < mat.size(); i++) {
+            for (size_t j = 0; j < mat[0].size(); j++) {
+                std::cout << mat[i][j];
             }
+            std::cout << std::endl;
         }
-        value++;
+    } else {
+        std::cout << "N";
     }
-    go_back(matrix, dist, fim, get(dist, fim));
-    remover_erros(matrix);
-    cout << value << endl;
     return 0;
 }
-
-
-
-
-
-
-
-
-
-

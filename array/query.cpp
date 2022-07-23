@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -21,21 +22,24 @@ vector <int> matchingStrings(vector <string> strings, vector <string> queries) {
 }
 
 int main () {
-    int size;
-
-    cin >> size;
-    vector <string> base(size,"");
-    for (int i = 0; i < size; i++) 
-        cin >> base[i];
-    
-    cin >> size;
-    vector <string> consulta(size,"");
-    for (int i = 0; i < size; i++) 
-        cin >> consulta[i];
-
-    vector <int> result = matchingStrings(base, consulta);
-    for (int i = 0; i < result.size(); i++) 
+    vector <string> strings;
+    vector <string> queries;
+    string line;
+    while(getline(cin, line)){
+        stringstream ss(line);
+        string x;
+        while(ss >> x)
+            strings.push_back(x);
+    }
+    getline(cin, line);
+    stringstream ss(line);
+    string x;
+    while(ss >> x)
+        queries.push_back(x);
+    vector <int> result = matchingStrings(strings, queries);
+    for (int i = 0; i < result.size(); i++) {
         cout << result[i] << endl;
+    }
     return 0;
 
 }

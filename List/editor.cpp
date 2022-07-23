@@ -58,110 +58,46 @@ struct Ambiente {
         itc->cursor++;
     }
 
-    void sendBackspace() {
+    void deletechar() {
         if (itc->cursor != itc->text.begin()) {
             itc->text.erase(itc->cursor--);
         }
     }
 
-    void sendDelete() {
-        if (itc->cursor != itc->text.end()) {
-            itc->text.erase(itc->cursor++);
-        }
-    }
-
-    void sendUp() {
-        int desloc = 0;
-        auto it = itc->cursor;
-
-        while(((*prev(it)) != '\n') && (prev(it) != itc->text.end())){
-            desloc++;
-            it--;
-        }
-       
-        if(prev(it) != itc->text.end()){
-            
-            do{
-                it--;
-            }while(((*prev(it)) != '\n') && (prev(it) != itc->text.end()));
-          
-            for(int i = 0; i < desloc; i++){
-                if(((*it) == '\n') || (it == itc->text.end()))
-                    break;
-                else
-                    it++;
+    void moverCursor(char c) {
+        if (c == 'l') {
+            if (itc->cursor != itc->text.begin()) {
+                itc->cursor--;
             }
-            itc->cursor = it;
-        }
-    }
-
-    void sendDown() {
-        int desloc = 0;
-        auto it = itc->cursor;
-        while(((*next(it)) != '\n') && (next(it) != itc->text.end())){
-            desloc++;
-            it++;
-        }
-        if(next(it) != itc->text.end()){
-            do{
-                it++;
-            }while(((*next(it)) != '\n') && (next(it) != itc->text.end()));
-            for(int i = 0; i < desloc; i++){
-                if(((*it) == '\n') || (it == itc->text.end()))
-                    break;
-                else
-                    it++;
+        } else if (c == 'r') {
+            if (itc->cursor != itc->text.end()) {
+                itc->cursor++;
             }
-            itc->cursor = it;
-        }
-    }
-
-    void sendLeft() {
-        if (itc->cursor != itc->text.begin()) {
-            itc->cursor--;
-        }
-    }
-
-    void sendRight() {
-        if (itc->cursor != itc->text.end()) {
-            itc->cursor++;
         }
     }
 };
 
-void processKey(Ambiente& ambiente, char tecla) {
-   if (tecla == 'z')
-        ambiente.controlZ();
-    else if (tecla == 'y')
-        ambiente.controlY();
-    else if (tecla == 'B')
-        ambiente.sendBackspace();
-    else if (tecla == 'D')
-        ambiente.sendDelete();
-    else if (tecla == 'U')
-        ambiente.insertchar('\n');
-    else if (tecla == 'L')
-        ambiente.insertchar('\t');
-    else if (tecla == 'A') {
-        ambiente.sendUp();
-    } else if (tecla == 'V') {
-        ambiente.sendDown();
-    } else if (tecla == '<') {
-        ambiente.sendLeft();
-    } else if (tecla == '>') {
-        ambiente.sendRight();
-    } else {
-        ambiente.insertchar(tecla);
-    }
-}
-
-int main () {
-    string init_text;
-    cin >> init_text;
-    Ambiente ambiente(init_text);
-    char tecla;
-    while (cin >> tecla) {
-        processKey(ambiente, tecla);
+int main() {
+    Ambiente ambiente;
+    string line;
+    while (getline(cin, line)) {
+        istringstream iss(line);
+        char c;
+        while (iss >> c) {
+            if (c == 'z') {
+                ambiente.controlZ();
+            } else if (c == 'y') {
+                ambiente.controlY();
+            } else if (c == 'i') {
+                char c;
+                cin >> c;
+                ambiente.insertchar(c);
+            } else if (c == 'd') {
+                ambiente.deletechar();
+            } else if (c == 'l' || c == 'r') {
+                ambiente.moverCursor(c);
+            }
+        }
         cout << ambiente.itc->getText() << endl;
     }
     return 0;

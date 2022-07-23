@@ -1,114 +1,104 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <algorithm>
 #include <list>
-#include <optional>
-#include <numeric>
-#include <functional>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
-const char EMPTY = '.';
+struct State{
+    list <char> text;
+    list <char>::iterator cursor;
 
-template<class T>
-    vector<T> range(T begin, T end) {
-        vector<T> result;
-        for (T i = begin; i < end; i++) {
-            result.push_back(i);
+    State(){
+        cursor = text.begin();
+    }
+
+    State(string init){
+        for (int i = 0; i < init.size(); i++) {
+            text.push_back(init[i]);
         }
-        return result;
+        cursor = text.begin();
     }
 
-struct Problema {
-    string data;
-    int lim;
-    vector<int> holes;
-
-    Problema(string data, int lim) {
-        this->data = data;
-        this->lim = lim;
-        for (int i = 0; i < data.size(); i++) 
-            if (data[i] == EMPTY) 
-                holes.push_back(i);
+    State(const State& other){
+        text = other.text;
+        cursor = other.cursor;
     }
 
-    bool fit(int pos, int size) {
-        for (int i = pos; i < pos + size; i++) {
-            if (i >= data.size() || data[i] != EMPTY)
-                return false;
+    string getText(){
+        stringstream ss;
+        for (auto it = text.begin(); it != text.end(); it++) {
+            ss << *it;
         }
-        return true;
-    }
-
-    bool solve(int hindex) {
-        if (hindex == holes.size()) {
-            return true;
-    }
-
-    auto index = holes[hindex];
-
-    auto values = shuffle(range<char>('0', '0' + lim + 1));
-        for (char v : values) {
-            if (this->fit(index, v)) {
-                this->data[index] = v;
-                if (this->solve(hindex + 1))
-                    return true;
-            }
-        }
-        data[index] = EMPTY;
-        return false;
-    }
-
-     int count_solutions(int hindex) {
-        if (hindex == (int) this->holes.size())
-            return true;
-        //
-        auto index = holes[hindex];
-        //
-        int solutions = 0;
-        auto values = shuffle(range<char>('0', '0' + lim + 1));
-        for (char v : values) {
-            if (this->fit(index, v)) {
-                this->data[index] = v;
-                solutions += count_solutions(hindex + 1);
-            }
-        }
-        data[index] = EMPTY;
-        return solutions;
-    }
-
-    bool can_remove(int index) {
-        auto data_backup = this->data;
-        data_backup[index] = EMPTY;
-        Problem prob(data_backup, lim);
-        int solutions = prob.count_solutions(0);
-        return solutions > 0;
-    }
-
-    void fill_holes() {
-        auto avaliable = shuffle(range<int>(0, data.size()));
-        for (int index : avaliable)
-            if (can_remove(index))
-                data[index] = EMPTY;
+        return ss.str();
     }
 };
 
-int main (int argc, char * argv[]) {
-    srand(time(NULL));
-   int size { 5 }, lim { 3 };
-    if (argc < 3) {
-        cout << "Usage: " << argv[0] << " <size> <lim>" << endl;
-        return 1;
-    }
-    std::istringstream(argv[1]) >> size;
-    std::istringstream(argv[2]) >> lim;
-    std::cout << size << ' ' << lim << endl;
+struct Ambiente {
+    list <State> states;
+    list <State>::iterator itc;
 
-    Problem prob(std::string(size, EMPTY), lim);
-    prob.solve(0);
-    std::cout << prob.data << endl;
-    prob.fill_holes();
-    std::cout << prob.data << endl;
+    Ambiente(string init_text = "") {
+        states.push_back(State(init_text));
+        itc = states.begin();
+    }
+
+    void controlZ(){
+        if (itc != states.begin()) {
+            itc--;
+        }
+    }
+
+    void controlY(){
+        if (itc != states.end()) {
+            itc++;
+        }
+    }
+
+    void insertchar(char c){
+        itc->text.insert(itc->cursor, c);
+        itc->cursor++;
+    }
+
+    void moverCursor(char c){
+        if (c == 'l'){
+            if (itc->cursor != itc->text.begin()){
+                itc->cursor--;
+            }
+        }
+        else if (c == 'r'){
+            if (itc->cursor != itc->text.end()){
+                itc->cursor++;
+            }
+        }
+    }
+};
+
+int main () {
+    Ambiente ambiente;
+    string comando;
+    while (getline(cin, comando)){
+        if (comando == "z"){
+            ambiente.controlZ();
+        }
+        else if (comando == "y"){
+            ambiente.controlY();
+        }
+        else if (comando == "i"){
+            char c;
+            cin >> c;
+            ambiente.insertchar(c);
+        }
+        else if (comando == "m"){
+            char c;
+            cin >> c;
+            ambiente.moverCursor(c);
+        }
+        else if (comando == "q"){
+            break;
+        }
+        cout << ambiente.itc->getText() << endl;
+    }
+    return 0;
 }
+

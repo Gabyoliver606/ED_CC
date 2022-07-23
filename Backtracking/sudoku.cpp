@@ -70,15 +70,15 @@ struct Problema {
 };
 
 int main () {
-    auto& input = cin;
-
-    int size { };
-    input >> size;
-    vector<string> data(size);
-    for (int i = 0; i < size; i++)
-        input >> data[i];
-    
-    Problem prob(data);
-    prob.solve(0);
-    std::cout << prob.str();
+    string line;
+    while (getline(cin, line)) {
+        stringstream ss(line);
+        int lim;
+        ss >> lim;
+        getline(cin, line);
+        Problema p(line, lim);
+        p.solve(0);
+        cout << p.str() << endl;
+    }
+    return 0;
 }

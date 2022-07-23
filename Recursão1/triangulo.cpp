@@ -12,24 +12,29 @@ void print(vector<int> vet){
     cout << " ]\n";
 }
 
-void processa(vector<int> vet){
-    if(vet.size() == 1)
-        return;
-    vector<int> aux;
-    for(size_t i = 0; i < vet.size() - 1; i++)
-        aux.push_back(vet[i] + vet[i + 1]);
-    processa(aux);
-    print(aux);
+void processar(vector<int> vet){
+   if(vet.size() == 1)
+       return;
+    int i = 0;
+    while(i < vet.size()){
+        if(vet[i] == 0)
+            vet.erase(vet.begin() + i);
+        else
+            i++;
+    }
 }
 
-int main(){
-    string line;
-    getline(cin, line);
-    stringstream ss(line);
+int main () {
     vector<int> vet;
-    int value;
-    while(ss >> value)
-        vet.push_back(value);
-    processa(vet);
-    print(vet);
+    string line;
+    while(getline(cin, line)){
+        istringstream iss(line);
+        int x;
+        while(iss >> x)
+            vet.push_back(x);
+        processar(vet);
+        print(vet);
+        vet.clear();
+    }
+    return 0;
 }
